@@ -1,32 +1,40 @@
-App.BaseNetworkManager = (function () {
+BaseNetworkManager = (function () {
 
-  // options: an object containing configuration options for the singleton
-  // e.g var options = { name: "test", pointX: 5};  
-  function Singleton( options )  {
+    // options: an object containing configuration options for the singleton
+    // e.g var options = { name: "test", pointX: 5};  
+    function Singleton( options )  {
 
-    options = options || {};
+        options = options || {};
 
-    // set some properties for our singleton
-    this.name = "BaseNetworkManager";
-    this.baseURL = options.baseURL;
+        // set some properties for our singleton
+        this.name = "BaseNetworkManager";
+        this.baseURL = options.baseURL;
 
-    var POST_METHOD = "POST", GET_METHOD = "GET";
+        var POST_METHOD = "POST", GET_METHOD = "GET";
 
-  	this.getArrayOfModel = function ( className ){
-  	  	return $.ajax({
-  	  		url: this.baseURL + className,
-  	  		type: GET_METHOD,
-  	  		dataType: "json"
-  	  	})
-  	};
+        this.getArrayOfModel = function ( className ){
+            return this.getArrayOfModelWithParams(className, nil);
+        };
 
-  };
+        this.getObjectWithId = function( id ){
 
-  // our instance holder  
-  var instance;
+        };
 
-  // an emulation of static variables and methods
-  var _static  = {   
+        this.getArrayOfModelWithParams = function( className, params ){
+            return $.ajax({
+                url: this.baseURL + className,
+                params: params;
+                type: GET_METHOD,
+                dataType: "json"
+            });
+        }
+    }
+
+    // our instance holder  
+    var instance;
+
+    // an emulation of static variables and methods
+    var _static  = {   
 
     name:  "BaseNetworkManager",
 
@@ -34,49 +42,47 @@ App.BaseNetworkManager = (function () {
     // a singleton instance of a singleton object
     getInstance:  function( options ) {    
 
-      if( instance  ===  undefined )  {     
+    if( instance  ===  undefined )  {     
         instance = new Singleton( options );    
-      }    
+    }    
 
-      return  instance;  
-       
+    return  instance;  
+
     }  
-  };  
+    };  
 
-  return  _static;
+    return  _static;
 
-})();
+    })();
 
-BaseNetworkManager = App.BaseNetworkManager.getInstance({
-	baseURL: "http://orangefashion.vn/api/" 
-})
+    BaseNetworkManager = BaseNetworkManager.getInstance({
+        baseURL: "http://orangefashion.vn/api/" 
+    });
 
-App.BaseObject = Em.Object.extend({
+    BaseObject = Em.Object.extend({
 
-	className: function(){
-		return "";
-	}.property(),
+    className: function(){
+        return "";
+    }.property(),
 
-	fetch: function(){
-		return BaseNetworkManager.getArrayOfModel(this.get("className"));
-	},
+    fetch: function(){
+        return BaseNetworkManager.getArrayOfModel(this.get("className"));
+    },
 
-	toString: function(){
-		return this.toString();
-	}
+    toString: function(){
+        return this.toString();
+    }
 
-})
-
-Product = App.BaseObject.extend({
-
-	className: function(){
-		return "products";
-	}.property()
-	
 });
 
-ProductSharedInstance = Product.create();
+Product = BaseObject.extend({
+    className: function(){
+        return "products";
+    }.property()
+});
 
+
+ProductSharedInstance = Product.create();
 ProductSharedInstance.fetch().done(function(data){
-	console.log(data);
+    console.log(data);
 });
